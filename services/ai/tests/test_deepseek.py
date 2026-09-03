@@ -2,6 +2,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import pytest
+
 from app.core.config import Settings
 from app.providers.deepseek import DeepSeekProvider
 

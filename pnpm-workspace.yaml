@@ -3,4 +3,8 @@ packages:
   - "packages/*"
   - "services/*"
 allowBuilds:
+  esbuild: true
   unrs-resolver: true
+
+overrides:
+  esbuild: 0.28.2

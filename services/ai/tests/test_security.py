@@ -1,6 +1,7 @@
 import pytest
-from app.core.security import require_internal_api_key
 from fastapi import HTTPException
+
+from app.core.security import require_internal_api_key
 
 
 @pytest.mark.asyncio
