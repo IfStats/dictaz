@@ -1,6 +1,7 @@
 
 import { sql } from 'drizzle-orm';
 import {
+  boolean,
   check,
   index,
   jsonb,
@@ -62,6 +63,13 @@ export const users = pgTable(
     email: varchar('email', { length: 320 }).notNull(),
     displayName: varchar('display_name', { length: 160 }),
     bio: text('bio'),
+    emailVerifiedAt: timestamp('email_verified_at', {
+  withTimezone: true,
+}),
+
+isActive: boolean('is_active')
+  .notNull()
+  .default(true),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -170,3 +178,134 @@ export const articles = pgTable(
     ),
   ],
 );
+
+
+export const authCredentials = pgTable('auth_credentials', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+
+  passwordHash: text('password_hash').notNull(),
+
+  passwordChangedAt: timestamp('password_changed_at', {
+    withTimezone: true,
+  }).notNull().defaultNow(),
+
+  createdAt: timestamp('created_at', {
+    withTimezone: true,
+  }).notNull().defaultNow(),
+
+  updatedAt: timestamp('updated_at', {
+    withTimezone: true,
+  }).notNull().defaultNow(),
+});
+
+export const authSessions = pgTable(
+  'auth_sessions',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    tokenHash: varchar('token_hash', {
+      length: 64,
+    }).notNull(),
+
+    expiresAt: timestamp('expires_at', {
+      withTimezone: true,
+    }).notNull(),
+
+    revokedAt: timestamp('revoked_at', {
+      withTimezone: true,
+    }),
+
+    lastUsedAt: timestamp('last_used_at', {
+      withTimezone: true,
+    }),
+
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+    }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('auth_sessions_token_hash_unique')
+      .on(table.tokenHash),
+
+    index('auth_sessions_user_idx')
+      .on(table.userId),
+
+    index('auth_sessions_expires_idx')
+      .on(table.expiresAt),
+  ],
+);
+
+export const emailVerificationTokens = pgTable(
+  'email_verification_tokens',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    tokenHash: varchar('token_hash', {
+      length: 64,
+    }).notNull(),
+
+    expiresAt: timestamp('expires_at', {
+      withTimezone: true,
+    }).notNull(),
+
+    consumedAt: timestamp('consumed_at', {
+      withTimezone: true,
+    }),
+
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+    }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('email_verification_token_hash_unique')
+      .on(table.tokenHash),
+
+    index('email_verification_user_idx')
+      .on(table.userId),
+  ],
+);
+
+export const passwordResetTokens = pgTable(
+  'password_reset_tokens',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    tokenHash: varchar('token_hash', {
+      length: 64,
+    }).notNull(),
+
+    expiresAt: timestamp('expires_at', {
+      withTimezone: true,
+    }).notNull(),
+
+    consumedAt: timestamp('consumed_at', {
+      withTimezone: true,
+    }),
+
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+    }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('password_reset_token_hash_unique')
+      .on(table.tokenHash),
+
+    index('password_reset_user_idx')
+      .on(table.userId),
+  ],
+);
+
