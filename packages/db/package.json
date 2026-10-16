@@ -2,12 +2,33 @@
   "name": "@dictaz/db",
   "version": "0.1.0",
   "private": true,
-  "scripts": {},
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:check": "drizzle-kit check",
+    "db:migrate": "drizzle-kit migrate",
+    "db:verify": "node ./scripts/verify-db.mjs",
+    "build": "tsc -p tsconfig.build.json",
+    "db:verify:client": "node ./scripts/verify-client.mjs"
+  },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
     "postgres": "^3.4.9"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.10"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "default": "./dist/schema.js"
+    }
   }
 }
